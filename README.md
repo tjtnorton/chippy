@@ -1,2 +1,2 @@
 # chippy
-Chip8 / SCHIP emulator implemented in Python
+A(nother) Chip8 / SCHIP emulator implemented in Python.
