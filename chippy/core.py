@@ -1,8 +1,8 @@
 import os
 import numpy as np
+from chippy.instructions import Opcode, InstructionSet
 from . import graphics
 from . import keyboard
-from instructions import Opcode, InstructionSet
 
 FONTSET = [
     0xf0, 0x90, 0x90, 0x90, 0xf0,  # 0

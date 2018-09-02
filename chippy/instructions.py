@@ -21,12 +21,12 @@ class Opcode(object):
     _SYLENGTH = 4  # Length of opcode symbol in bits
 
     def __init__(self, code):
-        BASE = 16
+        base = 16
 
         if isinstance(code, str):
-            code = int(code, BASE)
+            code = int(code, base)
 
-        assert (code < BASE**self._SYNUM) and (code >= 0), \
+        assert (code < base**self._SYNUM) and (code >= 0), \
             "OPCODE must range between '0000'--'FFFF'."
 
         self.code = code
