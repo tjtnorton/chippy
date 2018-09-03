@@ -1,6 +1,7 @@
 import os
+import pkg_resources
 import numpy as np
-from chippy.instructions import Opcode, InstructionSet
+from .instructions import Opcode, InstructionSet
 from . import graphics
 from . import keyboard
 
@@ -63,8 +64,7 @@ class Machine(object):
 
         # Get absolute path to game
         if not os.path.isabs(fname):
-            fname = os.path.join(os.getcwd(), fname)
-        print(fname)
+            fname = pkg_resources.resource_filename(__name__, fname)
 
         # Determine and set game name
         current_game = os.path.basename(os.path.splitext(fname)[0])
