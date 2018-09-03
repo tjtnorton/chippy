@@ -2,4 +2,8 @@
 /trash
 /.idea
 /.vscode
+/dist
+/build
+/*.egg-info
 *.pyc
+
