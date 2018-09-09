@@ -53,7 +53,7 @@ class Opcode(object):
             str_code[:2] + 'M' + str_code[3:],
             str_code[:2] + 'MM' + str_code[4],
             str_code[:2] + 'MMM',
-            str_code[:5] + 'M',
+            str_code[:4] + 'M',
         ])
 
     @property
@@ -102,8 +102,7 @@ class InstructionSet(object):
         machine.gfx.scroll('left', 4)
 
     def _00FD(self, machine):  # 00FD
-        # UI.flag_quit = true;
-        pass
+        machine.keyboard.set_exit()
 
     def _00FE(self, machine):  # 00FE
         machine.gfx.set_resolution('low')
@@ -251,6 +250,9 @@ class InstructionSet(object):
     def _FM29(self, machine):  # FX29
         machine.I = machine.V[self.opcode.X] * 0x5
         # Note: sprites are stored as 4x5 hex font characters (0-F)
+
+    def _FM30(self, machine):  # FX29
+        machine.I = machine.V[self.opcode.X] * 0xA + 16 * 0x5
 
     def _FM33(self, machine):  # FX33
         machine.memory[machine.I] = machine.V[self.opcode.X] // 100
