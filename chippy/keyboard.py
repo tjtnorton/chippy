@@ -20,35 +20,46 @@ class HexKeyboard(object):
         pygame.K_x: 0x0,
         pygame.K_c: 0xb,
         pygame.K_v: 0xf,
+        pygame.K_p: 16,        # Extra Feature: Pause Emulator
+        pygame.K_TAB: 17,      # Extra Feature: Reset Emulator
+        pygame.K_ESCAPE: 18    # Extra Feature: Turn Off Emulator
     }
 
     def __init__(self):
-        self.state = np.zeros(len(self.key_map))
+        self.state = np.zeros(len(self.key_map), dtype=bool)
 
     def update_key_press(self, event):
-        if event.type == pygame.KEYDOWN and event.key in self.key_map:
-            self.state[self.key_map[event.key]] = 1
+        if event.type == pygame.KEYDOWN and event.key is pygame.K_p:
+            self.set_pause()
+
+        elif event.type == pygame.KEYDOWN and event.key in self.key_map:
+            self.state[self.key_map[event.key]] = True
 
     def update_key_release(self, event):
-        if event.type == pygame.KEYUP and event.key in self.key_map:
-            self.state[self.key_map[event.key]] = 0
+        if event.type == pygame.KEYUP and event.key is pygame.K_p:
+            return
+
+        elif event.type == pygame.KEYUP and event.key in self.key_map:
+            self.state[self.key_map[event.key]] = False
 
     def get_active_key(self):
-        return self.state.argmax()
+        return self.state[:16].argmax()  # Only care about the hex keys.
 
     def reset(self):
-        self.state = np.zeros(len(self.key_map))
+        self.state = np.zeros(len(self.key_map), dtype=bool)
 
-    @staticmethod
-    def is_exit(event):
-        close = event.type == pygame.QUIT
-        esc = event.type == pygame.KEYUP and event.key == pygame.K_ESCAPE
-        return close or esc
+    def set_exit(self):
+        self.state[self.key_map[pygame.K_ESCAPE]] = True
 
-    @staticmethod
-    def is_reset(event):
-        return event.type == pygame.KEYUP and event.key == pygame.K_TAB
+    def set_pause(self):
+        pause_idx = self.key_map[pygame.K_p]
+        self.state[pause_idx] = ~self.state[pause_idx]
 
-    @staticmethod
-    def is_paused(event):
-        return event.type == pygame.KEYUP and event.key == pygame.K_p
+    def is_exit(self):
+        return self.state[self.key_map[pygame.K_ESCAPE]]
+
+    def is_reset(self):
+        return self.state[self.key_map[pygame.K_TAB]]
+
+    def is_paused(self):
+        return self.state[self.key_map[pygame.K_p]]
