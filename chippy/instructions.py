@@ -53,6 +53,7 @@ class Opcode(object):
             str_code[:2] + 'M' + str_code[3:],
             str_code[:2] + 'MM' + str_code[4],
             str_code[:2] + 'MMM',
+            str_code[:5] + 'M',
         ])
 
     @property
@@ -91,6 +92,25 @@ class InstructionSet(object):
         return fun(machine)
 
     # ===== INSTRUCTIONS ==================================================== #
+    def _00CM(self, machine):  # 00CN
+        machine.gfx.scroll('down', self.opcode.N)
+
+    def _00FB(self, machine):  # 00FB
+        machine.gfx.scroll('right', 4)
+
+    def _00FC(self, machine):  # 00FC
+        machine.gfx.scroll('left', 4)
+
+    def _00FD(self, machine):  # 00FD
+        # UI.flag_quit = true;
+        pass
+
+    def _00FE(self, machine):  # 00FE
+        machine.gfx.set_resolution('low')
+
+    def _00FF(self, machine):  # 00FF
+        machine.gfx.set_resolution('high')
+
     def _00E0(self, machine):  # 00E0
         machine.gfx.clear()
 
@@ -191,7 +211,8 @@ class InstructionSet(object):
         machine.V[self.opcode.X] = random.randint(0, 255) & self.opcode.NN
 
     def _DMMM(self, machine):  # DXYN
-        img = machine.memory[machine.I:machine.I + self.opcode.N]
+        N = self.opcode.N if self.opcode.N > 0 else 2 * machine.gfx.MAX_HEIGHT
+        img = machine.memory[machine.I:machine.I + N]
         machine.gfx.draw_sprite(
             img, machine.V[self.opcode.X], machine.V[self.opcode.Y]
         )
