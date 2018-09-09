@@ -1,4 +1,3 @@
-import numpy as np
 import pygame
 from . import core
 
@@ -6,13 +5,6 @@ from . import core
 SECOND = 1000         # Milliseconds in second
 FPS = 60              # Frames per second
 OPPF = 18             # Opcodes executed per frame
-
-
-def _convert_to_sdl(screen):
-    """Convert a 2D pixel array and to (grayscale) uint32 array."""
-    screen = screen.astype(np.uint32)
-    sdl_screen = screen + np.left_shift(screen, 8)
-    return (screen + np.left_shift(sdl_screen, 8)).T
 
 
 def main(fpath):
@@ -26,34 +18,31 @@ def main(fpath):
 
     # Start gameloop
     running = True
-    paused = False
     while running:
         # Emulate chip8 cpu cycle
-        if not paused:
-            for _ in range(OPPF):
-                pygame.time.wait(int(SECOND/FPS/OPPF))  # Slow down execution
-                machine.emulate_cycle()
-            machine.decrement_timers()  # unindent for reasonable reaction time
+        if machine.keyboard.is_exit():
+            break
+
+        for _ in range(OPPF):
+            pygame.time.wait(int(SECOND/FPS/OPPF))  # Slow down execution
+            machine.emulate_cycle()
+        machine.decrement_timers()  # unindent for reasonable reaction time
 
         # Poll events
         for event in pygame.event.get():
-            if machine.keyboard.is_exit(event):
+            if event.type == pygame.QUIT:
                 running = False
-
-            if machine.keyboard.is_reset(event):
-                machine.reset()
-
-            if machine.keyboard.is_paused(event):
-                paused = ~paused
 
             machine.keyboard.update_key_press(event)
             machine.keyboard.update_key_release(event)
 
         # Update graphics (sdl)
-        pixel_data = _convert_to_sdl(machine.gfx.draw())
+        pixel_data = machine.gfx.sdl_screen()
         pygame.surfarray.blit_array(screen, pixel_data)
         pygame.display.flip()
 
+    # Kill everything!
+    pygame.quit()
 
 # Launch from command line
 if __name__ == '__main__':

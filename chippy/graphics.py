@@ -71,6 +71,12 @@ class GFX(object):
         self.screen[:, :, 1:] = self.screen[:, :, :-1]
         return screen
 
+    def sdl_screen(self):
+        """Convert a 2D pixel array and to (grayscale) uint32 array."""
+        screen = self.draw().astype(np.uint32)
+        sdl_screen = screen + np.left_shift(screen, 8)
+        return (screen + np.left_shift(sdl_screen, 8)).T
+
     def set_resolution(self, resolution):
         if resolution == 'low':
             self.width = CHIP8_WIDTH
