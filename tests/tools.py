@@ -23,5 +23,6 @@ def print_hex_dump(machine, cols=32):
 
 def write_hex_dump(machine, cols=32):
     """ Write hexdump of memory"""
-    with open(machine.current_game+'.hexdmp', 'w+') as f:
+    fname = 'game'
+    with open(fname+'.hexdmp', 'w+') as f:
         f.write(hex_dump(machine, cols))

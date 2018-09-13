@@ -29,7 +29,7 @@ class GFX(object):
         self.collision_flag = False
 
         # Chip8 screen
-        self.screen = np.zeros([self.height, self.width, self.DEPTH], np.uint8)
+        self.screen = np.zeros([self.height, self.width, GFX.DEPTH], np.uint8)
         self.weights = GFX.compute_screen_weights()
 
     def draw_sprite(self, img, x, y):
@@ -55,9 +55,10 @@ class GFX(object):
 
     def draw(self):
         # Build screen by combining smoothing strategies - exponential and vote
-        smooth_screen = (self.screen * self.weights).sum(axis=2)
+        # smooth_screen = (self.screen * self.weights).sum(axis=2)
         vote_screen = np.max(self.screen[:, :, :GFX.VOTES], axis=2)
-        screen = (1 - vote_screen) * smooth_screen + vote_screen
+        # screen = (1 - vote_screen) * smooth_screen + vote_screen
+        screen = vote_screen
 
         # Upscale chip8 screen to window size
         screen = cv.resize(screen, GFX.WIN_SIZE, interpolation=cv.INTER_AREA)
@@ -70,15 +71,46 @@ class GFX(object):
         self.screen[:, :, 1:] = self.screen[:, :, :-1]
         return screen
 
-    def set_resolution(self, resolution='low'):
-        pass
+    def sdl_screen(self):
+        """Convert a 2D pixel array and to (grayscale) uint32 array."""
+        screen = self.draw().astype(np.uint32)
+        sdl_screen = screen + np.left_shift(screen, 8)
+        return (screen + np.left_shift(sdl_screen, 8)).T
 
-    def scroll(self, scroll_dir, rows):
-        pass
+    def set_resolution(self, resolution):
+        if resolution == 'low':
+            self.width = CHIP8_WIDTH
+            self.height = CHIP8_HEIGHT
+
+        elif resolution == 'high':
+            self.width = SCHIP_WIDTH
+            self.height = SCHIP_HEIGHT
+
+        else:
+            raise ValueError('Unknown resolution. Use either high or low.')
+
+        # Rebuild screen
+        self.screen = np.zeros([self.height, self.width, GFX.DEPTH], np.uint8)
+
+    def scroll(self, direction, shift):
+        if direction == 'down':
+            self.screen[shift:, :, 0] = self.screen[:-shift, :, 0]
+            self.screen[:shift, :, 0] = 0
+
+        elif direction == 'right':
+            self.screen[:, shift:, 0] = self.screen[:, :-shift, 0]
+            self.screen[:, :shift, 0] = 0
+
+        elif direction == 'left':
+            self.screen[:, :-shift, 0] = self.screen[:, shift:, 0]
+            self.screen[:, -shift:, 0] = 0
+
+        else:
+            raise ValueError('Unknown scroll direction')
 
     @staticmethod
     def compute_screen_weights():
         weights = np.arange(0, GFX.DEPTH, dtype=float)
-        weights = np.exp(-weights / GFX.DEPTH)
+        weights = np.exp(-weights / GFX.DEPTH**2)
         weights /= weights.sum()
         return weights.reshape(1, 1, GFX.DEPTH)
