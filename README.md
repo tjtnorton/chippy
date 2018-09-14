@@ -25,7 +25,10 @@ The **chippy** package can be installed directly from GitHub using pip:
 ```console
 pip install git+https://github.com/tjtnorton/chippy.git
 ``` 
-
+If behind a proxy, then the following pattern can be invoked:
+```console
+pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org --proxy http://[USER]:[PASSWORD]@[PROXY] git+https://github.com/tjtnorton/chippy.git
+``` 
 ## Launching a game
 Once the package is installed a CHIP8 or SCHIP game can be launched from the command line using the pattern:
 ```console
