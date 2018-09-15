@@ -14,7 +14,8 @@ setuptools.setup(
     },
     install_requires=['numpy', 'pygame', 'opencv-python'],
     classifiers=[
-        "Programming Language :: Python :: 2",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
     ],
 )
