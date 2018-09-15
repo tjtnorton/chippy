@@ -36,23 +36,21 @@ FONTSET = [
 
 
 class Machine(object):
-    # Class constants
-    _CAPTION = "Chip8 Emulator. Current game: {}"
-
-    _MEMORY = 4096            # Total machine memory (bytes)
-    _PC0 = 512                # Program counter start
-    _REGISTERS = 16           # Number of registers
+    MEMORY = 4096            # Total machine memory (bytes)
+    PC_START = 512           # Program counter start
+    MAX_FILE_SIZE = 3584     # Limit on ROM size
+    REGISTERS = 16           # Number of registers
 
     def __init__(self):
-        self.caption = Machine._CAPTION.format('None')
+        self.game = ''                          # Game title
 
-        self.I = np.uint16(0)              # Index register
-        self.pc = np.uint16(self._PC0)     # Program counter
-        self.delay_timer = np.uint16(0)    # Delay timer
-        self.sound_timer = np.uint16(0)    # Sound timer
+        self.I = np.uint16(0)                   # Index register
+        self.pc = np.uint16(Machine.PC_START)   # Program counter
+        self.delay_timer = np.uint16(0)         # Delay timer
+        self.sound_timer = np.uint16(0)         # Sound timer
 
-        self.memory = np.zeros(self._MEMORY, np.uint8)  # 4K Emulated memory
-        self.V = np.zeros(self._REGISTERS, np.uint8)    # 8-bit registers
+        self.memory = np.zeros(Machine.MEMORY, np.uint8)  # 4K Emulated memory
+        self.V = np.zeros(Machine.REGISTERS, np.uint8)    # 8-bit registers
         self.stack = []                                 # Stack for subroutines
 
         # UI handling
@@ -61,41 +59,46 @@ class Machine(object):
 
     def reset(self):
         self.I = np.uint16(0)
-        self.pc = np.uint16(self._PC0)
+        self.pc = np.uint16(Machine.PC_START)
         self.delay_timer = np.uint16(0)
         self.sound_timer = np.uint16(0)
         self.stack = []
-        self.V = np.zeros(self._REGISTERS, np.uint8)
+        self.V = np.zeros(Machine.REGISTERS, np.uint8)
         self.gfx.clear()
         self.keyboard.reset()
 
-    def load_game(self, fname):
+    def load_game(self, game_path):
         self.reset()
+        PC0 = Machine.PC_START
+        MAX_FILE_SIZE = Machine.MAX_FILE_SIZE
+        NUMBER_OF_FONTS = len(FONTSET)
 
         # Get absolute path to game
-        if not os.path.isabs(fname):
-            fname = pkg_resources.resource_filename(__name__, fname)
+        if not os.path.isabs(game_path):
+            game_path = pkg_resources.resource_filename(__name__, game_path)
 
-        # Determine and set game name
-        current_game = os.path.basename(os.path.splitext(fname)[0])
-        self.caption = Machine._CAPTION.format(current_game)
+        # Set game name
+        self.game = os.path.basename(os.path.splitext(game_path)[0]).upper()
 
         # Determine file size
-        fsize = os.path.getsize(fname)
-        max_size = self._MEMORY - self._PC0
-        if fsize > max_size:
-            print("Game ROM must not exceed {} bytes.".format(max_size))
+        file_size = os.path.getsize(game_path)
+        if file_size > MAX_FILE_SIZE:
+            print("ROM must not exceed {} bytes.".format(MAX_FILE_SIZE))
             return
 
-        else:
-            print("Game size = {} bytes.".format(fsize))
-
         # Read from file
-        with open(fname, 'rb') as game_file:
-            byte_data = map(ord, game_file.read())
-            mem_range = slice(self._PC0, self._PC0 + len(byte_data))
-            self.memory[:len(FONTSET)] = FONTSET
-            self.memory[mem_range] = byte_data
+        with open(game_path, 'rb') as game_file:
+            byte_data = [byte for byte in game_file.read()]
+            if isinstance(byte_data[0], str):  # Python 2 check
+                byte_data = map(ord, byte_data)
+
+            self.memory[:NUMBER_OF_FONTS] = FONTSET
+            self.memory[PC0:PC0 + file_size] = byte_data
+
+    def fetch_opcode(self):
+        lh_op = self.memory[self.pc]
+        rh_op = self.memory[self.pc + 1]
+        return Opcode.from_pair(lh_op, rh_op) 
 
     def emulate_cycle(self):
         if self.keyboard.is_reset():
@@ -105,11 +108,8 @@ class Machine(object):
             return
 
         else:
-            lh_op = self.memory[self.pc]
-            rh_op = self.memory[self.pc + 1]
+            opcode = self.fetch_opcode()             # Fetch
             self.pc += 2
-
-            opcode = Opcode.from_pair(lh_op, rh_op)  # Fetch
             instruction = InstructionSet(opcode)     # Decode
             instruction.execute(self)                # Execute
 
