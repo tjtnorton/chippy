@@ -7,13 +7,14 @@ FPS = 60              # Frames per second
 OPPF = 18             # Opcodes executed per frame
 
 
-def main(fpath):
+def main(game_path):
     # Initialization
     machine = core.Machine()
-    machine.load_game(fpath)
+    machine.load_game(game_path)
 
     pygame.init()
-    pygame.display.set_caption(machine.caption)
+    caption = "CHIPPY | Currently playing: {}"
+    pygame.display.set_caption(caption.format(machine.game))
     screen = pygame.display.set_mode(machine.gfx.WIN_SIZE)
 
     # Start gameloop
@@ -24,7 +25,7 @@ def main(fpath):
             break
 
         for _ in range(OPPF):
-            pygame.time.wait(int(SECOND/FPS/OPPF))  # Slow down execution
+            pygame.time.wait(int(SECOND / FPS / OPPF))  # Slow down execution
             machine.emulate_cycle()
         machine.decrement_timers()  # unindent for reasonable reaction time
 
