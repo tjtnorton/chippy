@@ -67,11 +67,17 @@ class Machine(object):
         self.gfx.clear()
         self.keyboard.reset()
 
+    def clean_memory(self):
+        self.memory = np.zeros(Machine.MEMORY, np.uint8)
+
     def load_game(self, game_path):
-        self.reset()
         PC0 = Machine.PC_START
         MAX_FILE_SIZE = Machine.MAX_FILE_SIZE
         NUMBER_OF_FONTS = len(FONTSET)
+
+        # Re-initialise machine
+        self.clean_memory()
+        self.reset()
 
         # Get absolute path to game
         if not os.path.isabs(game_path):
@@ -83,7 +89,7 @@ class Machine(object):
         # Determine file size
         file_size = os.path.getsize(game_path)
         if file_size > MAX_FILE_SIZE:
-            print("ROM must not exceed {} bytes.".format(MAX_FILE_SIZE))
+            print("ROM cannot exceed {} bytes.".format(MAX_FILE_SIZE))
             return
 
         # Read from file
