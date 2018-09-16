@@ -44,9 +44,6 @@ A list of available games can be found in games library table below.
 ## Playing a game
 CHIP8 games were originally designed to be played on a 16-key hexadecimal keypad. The following keyboard mapping has been used in this package:
 
-<tbale>
-
-
 <table align='center'>
 <tr><th>ORIGINAL </th><th>MAPPED</th></tr>
 <tr><td>
