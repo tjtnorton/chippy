@@ -1,9 +1,8 @@
 # chippy
 A(nother) **CHIP8 / SCHIP** emulator (interpreter) implemented in Python.
-
-![BLINKY](https://raw.githubusercontent.com/tjtnorton/chippy/master/img/chippy_blinky.png "SCHIP running BLINKY")
-
-
+<p align="center">
+  <img src="https://raw.githubusercontent.com/tjtnorton/chippy/master/img/chippy_blinky.png", title="CHIPPY running BLINKY">
+</p>
 
 CHIP8 is an interpreted programming language that was developed by Joseph Weisbecker in the 1970s for use on 8-bit microcomputers such as the COSMAC VIP and Telmac 1800 (cf. <https://en.wikipedia.org/wiki/CHIP-8> for more details).
 
@@ -45,7 +44,10 @@ A list of available games can be found in games library table below.
 ## Playing a game
 CHIP8 games were originally designed to be played on a 16-key hexadecimal keypad. The following keyboard mapping has been used in this package:
 
-<table>
+<tbale>
+
+
+<table align='center'>
 <tr><th>ORIGINAL </th><th>MAPPED</th></tr>
 <tr><td>
 
