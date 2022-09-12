@@ -17,6 +17,7 @@ class Opcode(object):
     code : int or str
         A two-byte (16-bit) opcode.
     """
+
     _SYNUM = 4  # Total number of symbols in opcode
     _SYLENGTH = 4  # Length of opcode symbol in bits
 
@@ -26,8 +27,9 @@ class Opcode(object):
         if isinstance(code, str):
             code = int(code, base)
 
-        assert (code < base**self._SYNUM) and (code >= 0), \
-            "OPCODE must range between '0000'--'FFFF'."
+        assert (code < base**self._SYNUM) and (
+            code >= 0
+        ), "OPCODE must range between '0000'--'FFFF'."
 
         self.code = code
 
@@ -42,19 +44,21 @@ class Opcode(object):
 
     def as_str(self):
         shifts = range(Opcode._SYNUM)
-        hex_syms = ['{:1x}'.format(self._extract_symbol(s, 1)) for s in shifts]
-        return ''.join(hex_syms).upper()[::-1]
+        hex_syms = ["{:1x}".format(self._extract_symbol(s, 1)) for s in shifts]
+        return "".join(hex_syms).upper()[::-1]
 
     def generate_masks(self):
         # Mask opcodes for decoding
-        str_code = '_' + self.as_str()
-        return set([
-            str_code,
-            str_code[:2] + 'M' + str_code[3:],
-            str_code[:2] + 'MM' + str_code[4],
-            str_code[:2] + 'MMM',
-            str_code[:4] + 'M',
-        ])
+        str_code = "_" + self.as_str()
+        return set(
+            [
+                str_code,
+                str_code[:2] + "M" + str_code[3:],
+                str_code[:2] + "MM" + str_code[4],
+                str_code[:2] + "MMM",
+                str_code[:4] + "M",
+            ]
+        )
 
     @property
     def G(self):
@@ -93,22 +97,22 @@ class InstructionSet(object):
 
     # ===== INSTRUCTIONS ==================================================== #
     def _00CM(self, machine):  # 00CN
-        machine.gfx.scroll('down', self.opcode.N)
+        machine.gfx.scroll("down", self.opcode.N)
 
     def _00FB(self, machine):  # 00FB
-        machine.gfx.scroll('right', 4)
+        machine.gfx.scroll("right", 4)
 
     def _00FC(self, machine):  # 00FC
-        machine.gfx.scroll('left', 4)
+        machine.gfx.scroll("left", 4)
 
     def _00FD(self, machine):  # 00FD
         machine.keyboard.set_exit()
 
     def _00FE(self, machine):  # 00FE
-        machine.gfx.set_resolution('low')
+        machine.gfx.set_resolution("low")
 
     def _00FF(self, machine):  # 00FF
-        machine.gfx.set_resolution('high')
+        machine.gfx.set_resolution("high")
 
     def _00E0(self, machine):  # 00E0
         machine.gfx.clear()
@@ -211,10 +215,8 @@ class InstructionSet(object):
 
     def _DMMM(self, machine):  # DXYN
         N = self.opcode.N if self.opcode.N > 0 else 2 * machine.gfx.MAX_HEIGHT
-        img = machine.memory[machine.I:machine.I + N]
-        machine.gfx.draw_sprite(
-            img, machine.V[self.opcode.X], machine.V[self.opcode.Y]
-        )
+        img = machine.memory[machine.I : machine.I + N]
+        machine.gfx.draw_sprite(img, machine.V[self.opcode.X], machine.V[self.opcode.Y])
         machine.V[0xF] = 1 if machine.gfx.collision_flag else 0
 
     def _EM9E(self, machine):  # EX9E

@@ -1,6 +1,6 @@
 import pygame
-from . import core
 
+from . import core
 
 SECOND = 1000         # Milliseconds in second
 FPS = 60              # Frames per second
@@ -45,7 +45,9 @@ def main(game_path):
     # Kill everything!
     pygame.quit()
 
+
 # Launch from command line
-if __name__ == '__main__':
+if __name__ == "__main__":
     import sys
+
     main(sys.argv[1])
