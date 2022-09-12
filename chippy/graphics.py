@@ -1,11 +1,10 @@
 # Import modules
-import numpy as np
 import cv2 as cv
-
+import numpy as np
 
 # Screen constants
-WIN_WIDTH = int(640*1.25)
-WIN_HEIGHT = int(320*1.25)
+WIN_WIDTH = int(640 * 1.25)
+WIN_HEIGHT = int(320 * 1.25)
 
 CHIP8_WIDTH = 64
 CHIP8_HEIGHT = 32
@@ -36,7 +35,7 @@ class GFX(object):
         height = min(len(img), GFX.MAX_HEIGHT)
         bytes_per_row = (height // GFX.MAX_HEIGHT) + 1
         dx = min(self.width - x, 8 * bytes_per_row)  # Compensate for xboundary
-        dy = min(self.height - y, height)            # Compensate for yboundary
+        dy = min(self.height - y, height)  # Compensate for yboundary
 
         if dx <= 0 or dy <= 0:
             return
@@ -44,8 +43,8 @@ class GFX(object):
         img_array = img.reshape([height, bytes_per_row])
         pxls = np.unpackbits(img_array, axis=1)[:dy, :dx]
 
-        self.collision_flag = (self.screen[y:y+dy, x:x+dx, 0] & pxls).any()
-        self.screen[y:y+dy, x:x+dx, 0] ^= pxls
+        self.collision_flag = (self.screen[y : y + dy, x : x + dx, 0] & pxls).any()
+        self.screen[y : y + dy, x : x + dx, 0] ^= pxls
 
         # Update draw buffer
         self.screen[:, :, 1:] = self.screen[:, :, :-1]
@@ -56,7 +55,7 @@ class GFX(object):
     def draw(self):
         # Build screen by combining smoothing strategies - exponential and vote
         # smooth_screen = (self.screen * self.weights).sum(axis=2)
-        vote_screen = np.max(self.screen[:, :, :GFX.VOTES], axis=2)
+        vote_screen = np.max(self.screen[:, :, : GFX.VOTES], axis=2)
         # screen = (1 - vote_screen) * smooth_screen + vote_screen
         screen = vote_screen
 
@@ -78,35 +77,35 @@ class GFX(object):
         return (screen + np.left_shift(sdl_screen, 8)).T
 
     def set_resolution(self, resolution):
-        if resolution == 'low':
+        if resolution == "low":
             self.width = CHIP8_WIDTH
             self.height = CHIP8_HEIGHT
 
-        elif resolution == 'high':
+        elif resolution == "high":
             self.width = SCHIP_WIDTH
             self.height = SCHIP_HEIGHT
 
         else:
-            raise ValueError('Unknown resolution. Use either high or low.')
+            raise ValueError("Unknown resolution. Use either high or low.")
 
         # Rebuild screen
         self.screen = np.zeros([self.height, self.width, GFX.DEPTH], np.uint8)
 
     def scroll(self, direction, shift):
-        if direction == 'down':
+        if direction == "down":
             self.screen[shift:, :, 0] = self.screen[:-shift, :, 0]
             self.screen[:shift, :, 0] = 0
 
-        elif direction == 'right':
+        elif direction == "right":
             self.screen[:, shift:, 0] = self.screen[:, :-shift, 0]
             self.screen[:, :shift, 0] = 0
 
-        elif direction == 'left':
+        elif direction == "left":
             self.screen[:, :-shift, 0] = self.screen[:, shift:, 0]
             self.screen[:, -shift:, 0] = 0
 
         else:
-            raise ValueError('Unknown scroll direction')
+            raise ValueError("Unknown scroll direction")
 
     @staticmethod
     def compute_screen_weights():
